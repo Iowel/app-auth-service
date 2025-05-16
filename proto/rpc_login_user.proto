@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package pb;
+
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/Iowel/app-auth-service/pkg/pb";
+
+
+message LoginUserRequest {
+    string email = 1;
+    string password = 2;
+}
+
+
+message LoginResponsePayload {
+    bool error = 1;
+    string message = 2;
+    Token token = 3;
+}
+
+message Token {
+    string plaintext = 1;
+    int64 userid = 2;
+    bytes hash = 3;
+    google.protobuf.Timestamp expiry = 4;
+    string scope = 5;
+    string role = 6;
+}
+
+

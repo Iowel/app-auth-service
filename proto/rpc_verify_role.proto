@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package pb;
+
+
+
+option go_package = "github.com/Iowel/app-auth-service/pkg/pb";
+
+
+
+message VerifyRoleRequest {
+
+}
+
+
+message VerifyRoleResponse {
+  bool error = 1;
+  string message = 2;
+}
+
+

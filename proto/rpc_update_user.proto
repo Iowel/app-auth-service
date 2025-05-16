@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package pb;
+
+import "user.proto";
+
+
+option go_package = "github.com/Iowel/app-auth-service/pkg/pb";
+
+message UpdateUserRequest {
+    string name = 1;
+    optional string email = 2;
+    optional string password = 3;
+}
+
+message UpdateUserResponse {
+    User user = 1;
+    string user_agent = 2;
+    string client_ip = 3;
+}
+

@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package pb;
+
+import "rpc_register_user.proto";
+import "rpc_login_user.proto";
+import "rpc_update_user.proto";
+import "rpc_verify_email.proto";
+import "rpc_verify_token.proto";
+import "rpc_verify_role.proto";
+
+import "google/api/annotations.proto";
+
+
+option go_package = "github.com/Iowel/app-auth-service/pkg/pb";
+
+service AuthService {
+    rpc RegisterUser (RegisterUserRequest) returns (RegisterResponsePayload) {
+        option (google.api.http) = {
+                post: "/v1/register_user"
+                body: "*"
+            };
+    }
+
+    rpc LoginUser (LoginUserRequest) returns (LoginResponsePayload) {
+        option (google.api.http) = {
+            post: "/v1/login_user"
+            body: "*"
+        };
+    }
+
+    rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse) {
+        option (google.api.http) = {
+                patch: "/v1/update_user"
+                body: "*"
+            };
+    }
+
+    rpc VerifyEmail (VerifyEmailRequest) returns (VerifyEmailResponse) {
+        option (google.api.http) = {
+                get: "/v1/verify_email"
+            };
+    }
+
+    rpc VerifyToken (VerifyTokenRequest) returns (VerifyTokenResponse) {
+        option (google.api.http) = {
+          post: "/v1/verify_token"
+          body: "*"
+        };
+      }
+
+      rpc VerifyRole (VerifyRoleRequest) returns (VerifyRoleResponse) {
+        option (google.api.http) = {
+          post: "/v1/verify_role"
+          body: "*"
+        };
+      }
+}
+
+
