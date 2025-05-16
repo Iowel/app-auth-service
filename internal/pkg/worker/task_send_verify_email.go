@@ -75,10 +75,10 @@ func (processor *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Cont
 
 	// отправляем письмо
 	subject := "Hello"
-	// verifyURL := fmt.Sprintf("http://158.160.30.125:8082/verify_email?email_id=%d&secret_code=%s", verifyEmail.ID, verifyEmail.SecretCode)
+	verifyURL := fmt.Sprintf("http://158.160.88.247:8082/verify_email?email_id=%d&secret_code=%s", verifyEmail.ID, verifyEmail.SecretCode)
 
 	// для теста на локальной машине (TODO: вынести в конфиг)
-	verifyURL := fmt.Sprintf("http://localhost:8082/verify_email?email_id=%d&secret_code=%s", verifyEmail.ID, verifyEmail.SecretCode)
+	// verifyURL := fmt.Sprintf("http://localhost:8082/verify_email?email_id=%d&secret_code=%s", verifyEmail.ID, verifyEmail.SecretCode)
 
 	log.Printf("verifyURL %s\n", verifyURL)
 
