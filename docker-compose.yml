@@ -17,7 +17,7 @@ services:
     depends_on:
       - redis  
     networks:
-      - v1_app-network  
+      - app-base-server_app-network  
 
 
 
@@ -26,7 +26,7 @@ services:
     ports:
       - "6381:6379"
     networks:
-      - v1_app-network 
+      - app-base-server_app-network 
 
 
 
@@ -36,5 +36,5 @@ volumes:
 
 
 networks:
-  v1_app-network:
+  app-base-server_app-network:
     external: true
