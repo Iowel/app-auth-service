@@ -1,16 +1,18 @@
 package main
 
 import (
-	gapi "github.com/Iowel/app-auth-service/internal/delivery"
-	"github.com/Iowel/app-auth-service/internal/pkg/worker"
-	"github.com/Iowel/app-auth-service/internal/repository/postgres"
-	"github.com/Iowel/app-auth-service/internal/service"
-	"github.com/Iowel/app-auth-service/pkg/configs"
 	"context"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	gapi "github.com/Iowel/app-auth-service/internal/delivery"
+	"github.com/Iowel/app-auth-service/internal/pkg/worker"
+	"github.com/Iowel/app-auth-service/internal/repository/postgres"
+	"github.com/Iowel/app-auth-service/internal/service"
+	"github.com/Iowel/app-auth-service/pkg/cache"
+	"github.com/Iowel/app-auth-service/pkg/configs"
 
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -23,9 +25,13 @@ var interruptSignals = []os.Signal{
 	syscall.SIGINT,
 }
 
+const (
+	redisDB = 1
+	exp     = 999999
+)
+
 func main() {
 	cfg := configs.LoadConfig()
-
 
 	ctx, stop := signal.NotifyContext(context.Background(), interruptSignals...)
 	defer stop()
@@ -42,9 +48,10 @@ func main() {
 	userRepo := postgres.NewUserRepo(db)
 	tokenRepo := postgres.NewTokenRepository(db)
 	mailRepo := postgres.NewEmailRepository(db)
+	cacheRepo := cache.NewRedisCache(cfg.Redis.Port, redisDB, exp)
 
 	// service
-	authServ := service.NewAuthService(userRepo, tokenRepo)
+	authServ := service.NewAuthService(userRepo, tokenRepo, cacheRepo)
 	mailServ := service.NewMailService(userRepo, mailRepo)
 
 	// Подключение к Redis
@@ -52,7 +59,6 @@ func main() {
 		Addr: cfg.Redis.Port,
 	}
 	taskDistributor := worker.NewRedisTaskDistributor(redisOpt)
-
 
 	waitGroup, ctx := errgroup.WithContext(ctx)
 

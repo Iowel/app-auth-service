@@ -17,7 +17,7 @@ services:
     depends_on:
       - redis  
     networks:
-      - app-base-server_app-network  
+      - app-base-server_app-network
 
 
 
@@ -26,7 +26,7 @@ services:
     ports:
       - "6381:6379"
     networks:
-      - app-base-server_app-network 
+      - app-base-server_app-network
 
 
 

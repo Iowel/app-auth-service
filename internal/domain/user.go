@@ -12,6 +12,8 @@ type User struct {
 	Password        string    `json:"password"`
 	Name            string    `json:"name"`
 	IsEmailVerified bool      `json:"is_email_verified"`
+	Avatar          string    `json:"avatar"`
+	Role            string    `json:"role"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
@@ -30,19 +32,10 @@ type CreateUserTxParams struct {
 	AfterCreate func(*pb.User) error
 
 	// AdditionalData - дополнительные данные или флаги, которые могут понадобиться
-	// в процессе обработки. Можно использовать для логирования, валидации и прочего.
+	// в процессе обработки. можно использовать для логирования, валидации и прочего
 	AdditionalData map[string]interface{} `json:"additional_data,omitempty"`
 }
 
 type CreateUserTxResult struct {
 	User *pb.User
-}
-
-type UserRepository interface {
-	Create(*User) error
-	FindByEmail(string) (*User, error)
-}
-
-type UserService interface {
-	Register(email, password, name string) (*User, error)
 }

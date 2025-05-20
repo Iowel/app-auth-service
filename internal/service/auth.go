@@ -5,16 +5,20 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/Iowel/app-auth-service/internal/domain"
 	"github.com/Iowel/app-auth-service/internal/repository/postgres"
+	"github.com/Iowel/app-auth-service/pkg/cache"
 	"github.com/Iowel/app-auth-service/pkg/pb"
 
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/metadata"
 )
+
+var _ IAuthService = &authService{}
 
 type IAuthService interface {
 	Register(email, password, name string) (*pb.User, error)
@@ -29,12 +33,14 @@ type IAuthService interface {
 type authService struct {
 	userRepo  postgres.UserRepository
 	tokenRepo *postgres.TokenRepository
+	cache     cache.IPostCache
 }
 
-func NewAuthService(u postgres.UserRepository, tokenRepo *postgres.TokenRepository) IAuthService {
+func NewAuthService(u postgres.UserRepository, tokenRepo *postgres.TokenRepository, cache cache.IPostCache) IAuthService {
 	return &authService{
 		userRepo:  u,
 		tokenRepo: tokenRepo,
+		cache:     cache,
 	}
 }
 
@@ -75,7 +81,6 @@ func (a *authService) RegisterTx(ctx context.Context, params domain.CreateUserTx
 	if err != nil {
 		return nil, err
 	}
-
 	params.User.Password = string(hashPass)
 
 	// делаем юзверя
@@ -97,8 +102,6 @@ func (a *authService) Login(email, password string) (*pb.Token, error) {
 		return nil, domain.ErrWrongCredentials
 	}
 
-	log.Println(existUser)
-
 	// проверяем пароль
 	err = bcrypt.CompareHashAndPassword([]byte(existUser.Password), []byte(password))
 	if err != nil {
@@ -118,14 +121,36 @@ func (a *authService) Login(email, password string) (*pb.Token, error) {
 		return nil, domain.ErrWrongCredentials
 	}
 
-	log.Println(token)
-
 	// сохрпняем токен в базе
 	err = a.tokenRepo.InsertToken(token, existUser)
 	if err != nil {
 		log.Printf("InsertToken failed: %s, error: %s", op, err)
 		return nil, domain.ErrWrongCredentials
 	}
+
+	existProfile, err := a.userRepo.GetProfile(int(existUser.Id))
+	if err != nil {
+		log.Printf("InsertToken failed: %s, error: %s", op, err)
+		return nil, domain.ErrWrongCredentials
+	}
+
+	// save to redis cache
+	var u = &domain.UserCache{
+		ID:       int(existUser.Id),
+		Email:    existUser.Email,
+		Password: existUser.Password,
+		Name:     existUser.Name,
+		// IsEmailVerified: existUser.Isemailverified,
+		Avatar:    existUser.Avatar,
+		Role:      existUser.Role,
+		Status:    existProfile.Status,
+		Wallet:    &existProfile.Wallet,
+		CreatedAt: existUser.CreatedAt.AsTime(),
+		UpdatedAt: existUser.UpdatedAt.AsTime(),
+	}
+
+	idStr := "user:" + strconv.Itoa(u.ID)
+	a.cache.Set(idStr, u)
 
 	return token, nil
 }

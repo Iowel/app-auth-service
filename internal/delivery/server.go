@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/Iowel/app-auth-service/internal/pkg/worker"
 	"github.com/Iowel/app-auth-service/internal/service"
@@ -143,8 +144,10 @@ func RunGatewayServer(ctx context.Context, waitGroup *errgroup.Group, authServic
 	handler := c.Handler(HttpLogger(mux))
 
 	httpServer := &http.Server{
-		Handler: handler,
-		Addr:    cfg.Web.Port,
+		Handler:      handler,
+		Addr:         cfg.Web.Port,
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
 	}
 
 	waitGroup.Go(func() error {

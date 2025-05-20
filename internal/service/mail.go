@@ -8,23 +8,26 @@ import (
 	"github.com/Iowel/app-auth-service/internal/repository/postgres"
 )
 
+var _ IMailService = &mailService{}
+
+
 type IMailService interface {
 	VerifyEmailTx(ctx context.Context, arg domain.VerifyEmailTxParams) (postgres.VerifyEmailTxResult, error)
 }
 
-type MailService struct {
+type mailService struct {
 	userRepo postgres.UserRepository
 	mailRepo postgres.EmailRepositoryI
 }
 
 func NewMailService(u postgres.UserRepository, mail postgres.EmailRepositoryI) IMailService {
-	return &MailService{
+	return &mailService{
 		userRepo: u,
 		mailRepo: mail,
 	}
 }
 
-func (m *MailService) VerifyEmailTx(ctx context.Context, arg domain.VerifyEmailTxParams) (postgres.VerifyEmailTxResult, error) {
+func (m *mailService) VerifyEmailTx(ctx context.Context, arg domain.VerifyEmailTxParams) (postgres.VerifyEmailTxResult, error) {
 	const op = "service.VerifyEmailTx"
 
 	mail, err := m.mailRepo.VerifyEmailTx(ctx, arg)

@@ -15,7 +15,7 @@ const (
 	ScopeAuthentication = "authentication"
 )
 
-// генерируем токен с заданным сроком действия и возвращает его
+// генерируем токен с заданным сроком действия
 func GenerateToken(userID int64, ttl time.Duration, scope string) (*pb.Token, error) {
 	token := &pb.Token{
 		Userid: int64(userID),

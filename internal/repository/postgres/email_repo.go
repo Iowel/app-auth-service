@@ -14,21 +14,24 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+var _ EmailRepositoryI = &emailRepository{}
+
+
 type EmailRepositoryI interface {
 	CreateVerifyEmail(ctx context.Context, arg domain.CreateVerifyEmailParams) (*domain.VerifyEmail, error)
 	UpdateVerifyEmail(ctx context.Context, arg domain.UpdateVerifyEmailParams) (*domain.VerifyEmail, error)
 	VerifyEmailTx(ctx context.Context, arg domain.VerifyEmailTxParams) (VerifyEmailTxResult, error)
 }
 
-type EmailRepository struct {
+type emailRepository struct {
 	Db *pgxpool.Pool
 }
 
 func NewEmailRepository(db *pgxpool.Pool) EmailRepositoryI {
-	return &EmailRepository{Db: db}
+	return &emailRepository{Db: db}
 }
 
-func (e *EmailRepository) CreateVerifyEmail(ctx context.Context, arg domain.CreateVerifyEmailParams) (*domain.VerifyEmail, error) {
+func (e *emailRepository) CreateVerifyEmail(ctx context.Context, arg domain.CreateVerifyEmailParams) (*domain.VerifyEmail, error) {
 	const op = "db.CreateVerifyEmail"
 
 	query := `
@@ -60,7 +63,7 @@ func (e *EmailRepository) CreateVerifyEmail(ctx context.Context, arg domain.Crea
 	return &ve, nil
 }
 
-func (e *EmailRepository) UpdateVerifyEmail(ctx context.Context, arg domain.UpdateVerifyEmailParams) (*domain.VerifyEmail, error) {
+func (e *emailRepository) UpdateVerifyEmail(ctx context.Context, arg domain.UpdateVerifyEmailParams) (*domain.VerifyEmail, error) {
 	const op = "db.UpdateVerifyEmail"
 
 	query := `
@@ -100,7 +103,7 @@ type VerifyEmailTxResult struct {
 	User        *pb.User
 }
 
-func (r *EmailRepository) VerifyEmailTx(ctx context.Context, arg domain.VerifyEmailTxParams) (VerifyEmailTxResult, error) {
+func (r *emailRepository) VerifyEmailTx(ctx context.Context, arg domain.VerifyEmailTxParams) (VerifyEmailTxResult, error) {
 	const op = "repository.postgres.VerifyEmailTx"
 
 	var result VerifyEmailTxResult

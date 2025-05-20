@@ -1,9 +1,9 @@
 curl -X POST http://localhost:8083/v1/register_user
   -H "Content-Type: application/json" \
   -d '{
-        "email": "test@awd.com",
+        "email": "test1@awd.com",
         "password": "12345",
-        "name": "test1234"
+        "name": "test1"
       }'
 
 
@@ -11,7 +11,7 @@ curl -X POST http://localhost:8083/v1/register_user
 curl -X POST http://localhost:8083/v1/login_user
   -H "Content-Type: application/json" \
   -d '{
-        "email": "test@gmail.com",
+        "email": "test1@awd.com",
         "password": "12345"
       }'
 

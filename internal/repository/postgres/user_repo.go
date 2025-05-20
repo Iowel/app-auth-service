@@ -15,12 +15,16 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+var _ UserRepository = &userRepo{}
+
 type UserRepository interface {
 	CreateUser(email, password, name string) (*pb.User, error)
 	GetUserByEmail(email string) (*pb.User, error)
 	CreateUserTx(ctx context.Context, arg domain.CreateUserTxParams) (domain.CreateUserTxResult, error)
 	GetUserByName(ctx context.Context, name string) (*pb.User, error)
+
 	CreateProfile(profile *domain.Profile) error
+	GetProfile(id int) (*domain.Profile, error)
 
 	GetStatusIDByName(ctx context.Context, name string) (int, error)
 }
@@ -65,7 +69,13 @@ func (r *userRepo) CreateUser(email, password, name string) (*pb.User, error) {
 }
 
 func (u *userRepo) GetUserByEmail(email string) (*pb.User, error) {
-	query := `SELECT id, email, name, password, created_at, updated_at, is_email_verified FROM users WHERE email = $1`
+	query := `SELECT
+		id, email, name, password, role, avatar, created_at, updated_at, is_email_verified
+		FROM
+			users
+		WHERE
+			email = $1
+		`
 
 	var user pb.User
 	var createdAt time.Time
@@ -76,6 +86,8 @@ func (u *userRepo) GetUserByEmail(email string) (*pb.User, error) {
 		&user.Email,
 		&user.Name,
 		&user.Password,
+		&user.Role,
+		&user.Avatar,
 		&createdAt,
 		&updatedAt,
 		&user.Isemailverified,
@@ -108,7 +120,7 @@ func (r *userRepo) CreateUserTx(ctx context.Context, arg domain.CreateUserTxPara
 	query := `
     INSERT INTO users (email, password, name)
     VALUES ($1, $2, $3)
-    RETURNING id, created_at, updated_at, avatar
+    RETURNING id, role, avatar, is_email_verified, created_at, updated_at 
 `
 
 	var user pb.User
@@ -116,9 +128,11 @@ func (r *userRepo) CreateUserTx(ctx context.Context, arg domain.CreateUserTxPara
 
 	err = tx.QueryRow(ctx, query, arg.User.Email, arg.User.Password, arg.User.Name).Scan(
 		&user.Id,
+		&user.Role,
+		&user.Avatar,
+		&user.Isemailverified,
 		&createdAt,
 		&updatedAt,
-		&user.Avatar,
 	)
 
 	if err != nil {
@@ -212,4 +226,21 @@ func (r *userRepo) GetStatusIDByName(ctx context.Context, name string) (int, err
 		return 0, err
 	}
 	return id, nil
+}
+
+func (r *userRepo) GetProfile(id int) (*domain.Profile, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var profile domain.Profile
+
+	err := r.db.QueryRow(ctx, "SELECT id, status, wallet FROM profiles WHERE user_id = $1", id).Scan(
+		&profile.ID,
+		&profile.Status,
+		&profile.Wallet,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &profile, nil
 }

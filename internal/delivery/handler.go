@@ -53,6 +53,8 @@ func (h *Server) RegisterUser(ctx context.Context, req *pb.RegisterUserRequest) 
 		}, nil
 	}
 
+	log.Printf("user %v\n", user)
+
 	// Создание профиля
 	// TODO: ВЫНЕСТИ ОТСЮДА ЕТОТ УЖАС
 	profile := &domain.Profile{
