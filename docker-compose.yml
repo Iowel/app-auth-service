@@ -27,7 +27,26 @@ services:
       - "6381:6379"
     networks:
       - app-base-server_app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
+
+  asynqmon:
+    image: hibiken/asynqmon:latest
+    ports:
+      - "8098:8080"
+    environment:
+      - REDIS_ADDR=redis:6379
+      - REDIS_DB=0
+      - REDIS_PASSWORD=
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - app-base-server_app-network
 
 
 volumes:
