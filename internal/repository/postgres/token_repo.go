@@ -69,7 +69,7 @@ func (m *TokenRepository) GetUserForToken(token string) (*pb.User, error) {
 	// хншируем токен
 	tokenHash := sha256.Sum256([]byte(token))
 
-	// Структура для результата
+
 	var user pb.User
 
 	query := `

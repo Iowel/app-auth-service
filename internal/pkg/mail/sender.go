@@ -17,7 +17,7 @@ type EmailSender interface {
 }
 
 type GmailSender struct {
-	name              string // получатель увидит ето имя в качестве отправителя
+	name              string
 	fromEmailAddress  string
 	fromEmailPassword string
 }

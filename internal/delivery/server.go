@@ -77,7 +77,7 @@ func RunGrpcServer(ctx context.Context, waitGroup *errgroup.Group, cfg *configs.
 		return nil
 	})
 
-	// отслеживаем сигналы прерывания и корректно завершаем работу
+	// graceful shutdown
 	waitGroup.Go(func() error {
 		<-ctx.Done()
 		log.Println("graceful shutdown gRPC server")
@@ -108,7 +108,7 @@ func RunGatewayServer(ctx context.Context, waitGroup *errgroup.Group, authServic
 
 	grpcMux := runtime.NewServeMux(jsonOption)
 
-	// Регистрируем gRPC Gateway хендлер
+	// регистрируем gRPC gateway хендлер
 	err = pb.RegisterAuthServiceHandlerServer(ctx, grpcMux, server)
 	if err != nil {
 		log.Fatalf("cannot register gRPC gateway handler, path: %s, error: %v\n", op, err)
@@ -150,6 +150,7 @@ func RunGatewayServer(ctx context.Context, waitGroup *errgroup.Group, authServic
 		ReadTimeout:  15 * time.Second,
 	}
 
+	// graceful shutdown
 	waitGroup.Go(func() error {
 		log.Printf("start HTTP gateway server at %s\n", httpServer.Addr)
 

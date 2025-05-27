@@ -54,7 +54,7 @@ func main() {
 	authServ := service.NewAuthService(userRepo, tokenRepo, cacheRepo)
 	mailServ := service.NewMailService(userRepo, mailRepo)
 
-	// Подключение к Redis
+	// redis connection
 	redisOpt := asynq.RedisClientOpt{
 		Addr: cfg.Redis.Port,
 	}
@@ -64,7 +64,6 @@ func main() {
 
 	// servers
 	worker.RunTaskProcessor(ctx, waitGroup, cfg, redisOpt, db)
-
 	gapi.RunGrpcServer(ctx, waitGroup, cfg, db, authServ, mailServ, taskDistributor)
 	gapi.RunGatewayServer(ctx, waitGroup, authServ, mailServ, cfg, db, taskDistributor)
 
