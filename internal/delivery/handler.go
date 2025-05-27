@@ -23,15 +23,14 @@ func (h *Server) RegisterUser(ctx context.Context, req *pb.RegisterUserRequest) 
 		User: &pb.User{Email: req.Email, Password: req.Password, Name: req.Name},
 
 		AfterCreate: func(user *pb.User) error {
-			// Асинхронно отправляем зареганому юзверю письмо с подтверждением
 			taskPayload := &worker.PayloadSendVerifyEmail{
 				Name: user.Name,
 			}
 
 			opts := []asynq.Option{
-				asynq.MaxRetry(10),                // разрешаем повторить попытку не более 10 раз если задача не выполнена
-				asynq.ProcessIn(5 * time.Second),  // задержка для задачи, обработка начнется через 10 секунд
-				asynq.Queue(worker.QueueCritical), // если есть список задач с разным уровнем приоритета чтобп отправлять задачи в разные очереди
+				asynq.MaxRetry(10),
+				asynq.ProcessIn(5 * time.Second),
+				asynq.Queue(worker.QueueCritical),
 			}
 
 			return h.taskDistributor.DistributeTaskSendVerifyEmail(ctx, taskPayload, opts...)
@@ -90,7 +89,7 @@ func (h *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (*pb.L
 		case errors.Is(err, domain.ErrWrongCredentials), errors.Is(err, domain.ErrUserNotFound):
 			return &pb.LoginResponsePayload{
 				Error:   true,
-				Message: "Неверный email или пароль",
+				Message: "неверный email или пароль",
 			}, nil
 
 		case errors.Is(err, domain.Isemailverified):
@@ -159,7 +158,7 @@ func (h *Server) VerifyRole(ctx context.Context, req *pb.VerifyRoleRequest) (*pb
 		}, nil
 	}
 
-	if user.Role != "admin" {
+	if user.Role != "admin" && user.Role != "moderator" {
 		return &pb.VerifyRoleResponse{
 			Error:   true,
 			Message: "failed to verify role",

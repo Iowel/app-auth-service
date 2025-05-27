@@ -122,7 +122,6 @@ func (cache *redisCache) Delete(key string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	// создаем клиента
 	client := cache.getClient()
 
 	_, err := client.Del(ctx, key).Result()

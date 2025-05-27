@@ -31,7 +31,7 @@ type CreateUserTxParams struct {
 	User        *pb.User
 	AfterCreate func(*pb.User) error
 
-	// AdditionalData - дополнительные данные или флаги, которые могут понадобиться
+	// дополнительные данные или флаги, которые могут понадобиться
 	// в процессе обработки. можно использовать для логирования, валидации и прочего
 	AdditionalData map[string]interface{} `json:"additional_data,omitempty"`
 }

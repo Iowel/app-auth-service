@@ -9,7 +9,7 @@ type Profile struct {
 	About     string    `json:"about"`
 	Friends   []int     `json:"friends"`
 	Wallet    int       `json:"wallet"`
-	Status    string       `json:"status"`
+	Status    string    `json:"status"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

@@ -32,4 +32,3 @@ type UpdateVerifyEmailParams struct {
 	ID         int64  `json:"id"`
 	SecretCode string `json:"secret_code"`
 }
-

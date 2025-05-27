@@ -172,6 +172,7 @@ func (r *emailRepository) VerifyEmailTx(ctx context.Context, arg domain.VerifyEm
 
 	user.CreatedAt = timestamppb.New(createdAt)
 	user.UpdatedAt = timestamppb.New(updatedAt)
+	
 	result.User = &user
 
 	if err := tx.Commit(ctx); err != nil {

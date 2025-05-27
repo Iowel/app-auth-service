@@ -33,8 +33,8 @@ const (
 func main() {
 	cfg := configs.LoadConfig()
 
-	ctx, stop := signal.NotifyContext(context.Background(), interruptSignals...)
-	defer stop()
+	ctx, cancel := signal.NotifyContext(context.Background(), interruptSignals...)
+	defer cancel()
 
 	// db
 	db, err := pgxpool.New(ctx, cfg.DB.Dsn)

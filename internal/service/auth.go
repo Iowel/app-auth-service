@@ -115,7 +115,7 @@ func (a *authService) Login(email, password string) (*pb.Token, error) {
 	}
 
 	// генерим токен
-	token, err := GenerateToken(existUser.Id, 6*time.Hour, ScopeAuthentication)
+	token, err := GenerateToken(existUser.Id, 48*time.Hour, ScopeAuthentication)
 	if err != nil {
 		log.Printf("GenerateToken failed: path: %s, error: %s", op, err)
 		return nil, domain.ErrWrongCredentials
