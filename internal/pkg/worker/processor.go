@@ -35,7 +35,7 @@ type RedisTaskProcessor struct {
 	mailer   mail.EmailSender
 }
 
-// Создание нового обработчика задач Redis
+// обработчик задач
 func NewRedisTaskProcessor(redisOpt asynq.RedisClientOpt, userRepo postgres.UserRepository, mailRepo postgres.EmailRepositoryI, mailer mail.EmailSender) TaskProcessor {
 	server := asynq.NewServer(redisOpt, asynq.Config{
 		Queues: map[string]int{
@@ -63,7 +63,7 @@ func NewRedisTaskProcessor(redisOpt asynq.RedisClientOpt, userRepo postgres.User
 func (processor *RedisTaskProcessor) Start() error {
 	mux := asynq.NewServeMux()
 
-	// Регистрируем задачи
+	// регистрация задач
 	mux.HandleFunc(TaskSendVerifyEmail, processor.ProcessTaskSendVerifyEmail)
 
 	return processor.server.Start(mux)
@@ -89,7 +89,7 @@ func RunTaskProcessor(ctx context.Context, waitGroup *errgroup.Group, config *co
 		log.Fatalf("cannot launch Task Processor, path: %s, error: %s\n", op, err)
 	}
 
-	// прослушиваем сигналы прерывания и корректно уничтожаем сервер
+	// graceful shutdown
 	waitGroup.Go(func() error {
 		<-ctx.Done()
 		log.Println("graceful shutdown task processor")

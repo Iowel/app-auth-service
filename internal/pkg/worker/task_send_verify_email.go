@@ -13,26 +13,25 @@ import (
 	"github.com/hibiken/asynq"
 )
 
-// структура содержащая все данные задачи которые мы хотим сохранить в Redis, позже worker сможет извлечь их из очереди
+// данные задачи 
 type PayloadSendVerifyEmail struct {
 	Name string `json:"name"`
 }
 
-// даем asynq понять какую задачу нужно выполнить или обработать
+// описание задачи
 const (
 	TaskSendVerifyEmail = "task:send_verify_email"
 )
 
 func (distributor *RedisTaskDistributor) DistributeTaskSendVerifyEmail(ctx context.Context, payload *PayloadSendVerifyEmail, opts ...asynq.Option) error {
-	// Тут создаем новую задачу
 
-	// десириализуем payload объект в json
+	// парсим payload в json
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return fmt.Errorf("failed to marshal task payload: %w", err)
 	}
 
-	// создаем задачу чтобы отправить её в очередь
+	// создаем задачу
 	task := asynq.NewTask(TaskSendVerifyEmail, jsonPayload, opts...)
 
 	// ставим задачу в очередь
@@ -45,7 +44,7 @@ func (distributor *RedisTaskDistributor) DistributeTaskSendVerifyEmail(ctx conte
 	return nil
 }
 
-// Данная функция будет вызвана воркером, когда появится задача типа send:verify_email
+// функция будет вызвана воркером, когда появится задача типа send:verify_email
 func (processor *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Context, task *asynq.Task) error {
 	var payload PayloadSendVerifyEmail
 
@@ -63,7 +62,7 @@ func (processor *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Cont
 		return fmt.Errorf("failed to get user: %w", err)
 	}
 
-	// на данном этапе отправляем юзверю письмо
+	// отправляем юзверю письмо
 	verifyEmail, err := processor.mailRepo.CreateVerifyEmail(ctx, domain.CreateVerifyEmailParams{
 		User_id:    user.Id,
 		Email:      user.Email,
@@ -73,7 +72,6 @@ func (processor *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Cont
 		return fmt.Errorf("failed to create verify email: %w", err)
 	}
 
-	// отправляем письмо
 	subject := "Hello"
 	verifyURL := fmt.Sprintf("http://158.160.74.150:8082/verify_email?email_id=%d&secret_code=%s", verifyEmail.ID, verifyEmail.SecretCode)
 

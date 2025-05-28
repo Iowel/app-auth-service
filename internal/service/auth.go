@@ -12,6 +12,7 @@ import (
 	"github.com/Iowel/app-auth-service/internal/domain"
 	"github.com/Iowel/app-auth-service/internal/repository/postgres"
 	"github.com/Iowel/app-auth-service/pkg/cache"
+	"github.com/Iowel/app-auth-service/pkg/eventbus"
 	"github.com/Iowel/app-auth-service/pkg/pb"
 
 	"golang.org/x/crypto/bcrypt"
@@ -34,13 +35,15 @@ type authService struct {
 	userRepo  postgres.UserRepository
 	tokenRepo *postgres.TokenRepository
 	cache     cache.IPostCache
+	eventbus  *eventbus.EventBus
 }
 
-func NewAuthService(u postgres.UserRepository, tokenRepo *postgres.TokenRepository, cache cache.IPostCache) IAuthService {
+func NewAuthService(u postgres.UserRepository, tokenRepo *postgres.TokenRepository, cache cache.IPostCache, e *eventbus.EventBus) IAuthService {
 	return &authService{
 		userRepo:  u,
 		tokenRepo: tokenRepo,
 		cache:     cache,
+		eventbus:  e,
 	}
 }
 
@@ -88,6 +91,15 @@ func (a *authService) RegisterTx(ctx context.Context, params domain.CreateUserTx
 	if err != nil {
 		return nil, domain.ErrWrongCredentials
 	}
+
+	go a.eventbus.Publish(eventbus.Event{
+		Type: eventbus.EventType,
+		Data: domain.Stat{
+			UserID:      user.User.Id,
+			Description: eventbus.EventUserRegister,
+		},
+	})
+
 
 	return &user, nil
 }
@@ -151,6 +163,14 @@ func (a *authService) Login(email, password string) (*pb.Token, error) {
 
 	idStr := "user:" + strconv.Itoa(u.ID)
 	a.cache.Set(idStr, u)
+
+	go a.eventbus.Publish(eventbus.Event{
+		Type: eventbus.EventType,
+		Data: domain.Stat{
+			UserID:      existUser.Id,
+			Description: eventbus.EventUserLogin,
+		},
+	})
 
 	return token, nil
 }
