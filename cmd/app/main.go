@@ -46,7 +46,7 @@ func main() {
 	defer db.Close()
 
 	eventBus := eventbus.NewEventBus()
-	
+\	
 	// repository
 	userRepo := postgres.NewUserRepo(db)
 	tokenRepo := postgres.NewTokenRepository(db)
