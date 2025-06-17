@@ -46,7 +46,7 @@ func main() {
 	defer db.Close()
 
 	eventBus := eventbus.NewEventBus()
-
+	
 	// repository
 	userRepo := postgres.NewUserRepo(db)
 	tokenRepo := postgres.NewTokenRepository(db)
@@ -66,7 +66,7 @@ func main() {
 	taskDistributor := worker.NewRedisTaskDistributor(redisOpt)
 
 	waitGroup, ctx := errgroup.WithContext(ctx)
-
+	
 	// servers
 	worker.RunTaskProcessor(ctx, waitGroup, cfg, redisOpt, db)
 	gapi.RunGrpcServer(ctx, waitGroup, cfg, db, authServ, mailServ, taskDistributor)

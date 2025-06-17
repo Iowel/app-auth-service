@@ -23,15 +23,33 @@ services:
 
   redis:
     image: redis:7.4-alpine  
+    restart: unless-stopped
     ports:
       - "6381:6379"
     networks:
       - app-base-server_app-network
+    command: redis-server --save 60 1 --loglevel warning
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
+    volumes:
+      - redis_data:/data
+
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOST=redis
+    ports:
+      - "8099:8080"
+    depends_on:
+      - redis 
+    restart:
+      unless-stopped
+
 
 
   asynqmon:
@@ -52,7 +70,8 @@ services:
 volumes:
   postgres_data:
     driver: local
-
+  redis_data:
+    driver: local
 
 networks:
   app-base-server_app-network:
